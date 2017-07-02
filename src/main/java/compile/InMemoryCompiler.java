@@ -20,6 +20,7 @@ import java.security.PrivilegedAction;
 import java.security.SecureClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -143,7 +144,7 @@ public final class InMemoryCompiler {
         final DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
 
         // The options passed to the JavaCompiler, see https://docs.oracle.com/javase/7/docs/technotes/tools/windows/javac.html
-        List<String> options = new ArrayList<>();
+        List<String> options = new ArrayList<>(Collections.singletonList("-verbose"));
 
         // set the class path to be able to use JUnit
         try {
