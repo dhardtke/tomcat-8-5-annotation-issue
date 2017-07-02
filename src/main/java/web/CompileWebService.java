@@ -40,7 +40,8 @@ public class CompileWebService {
                 "@Retention(value=RetentionPolicy.RUNTIME)\n" +
                 "@Target(value=ElementType.METHOD)\n" +
                 "@interface MinimalAnnotation { }\n" +
-                "public class MinimalExample {" +
+                "class MinimalExample {" +
+                " static Class xxx = org.junit.Test.class;\n" +
                 "    @Test\n" +
                 "    @MinimalAnnotation\n" +
                 "    public void testTrivial() {" +
@@ -65,6 +66,8 @@ public class CompileWebService {
         // ---
         // Detected amount of annotations: 2, Detail: [@org.junit.Test(timeout=0, expected=class org.junit.Test$None), @minimal_example.MinimalAnnotation()]
         // ---
-        return "Detected amount of annotations: " + annotations.length + ", Detail: " + Arrays.toString(annotations);
+
+        return "CompilerFeedback: " + compiler.getCompilerFeedback().getMessages() + "\n" +
+                "Annotations: " + Arrays.toString(annotations);
     }
 }

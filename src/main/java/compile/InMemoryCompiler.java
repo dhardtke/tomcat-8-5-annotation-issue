@@ -20,7 +20,6 @@ import java.security.PrivilegedAction;
 import java.security.SecureClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,15 +66,6 @@ public final class InMemoryCompiler {
     public static InMemoryCompiler compile(final List<JavaClass> javaClasses, final String libraryPath) {
         final JavaCompiler javaCompiler = ToolProvider.getSystemJavaCompiler();
 
-        /*
-        final JavaCompiler javaCompiler;
-        try {
-            javaCompiler = (JavaCompiler)Class.forName("com.sun.tools.javac.api.JavacTool").newInstance();
-        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        */
-
         if (javaCompiler == null) {
             throw new RuntimeException("ToolProvider.getSystemJavaCompiler() returned null! This program needs to be run on a system with an installed JDK.");
         }
@@ -90,13 +80,14 @@ public final class InMemoryCompiler {
                 return doPrivileged(new PrivilegedAction<ClassLoader>() {
                     @Override
                     public ClassLoader run() {
-                        return new SecureClassLoader() {
+                        return new SecureClassLoader(InMemoryCompiler.class.getClassLoader()) {
                             @Override
                             protected Class<?> findClass(final String className) throws ClassNotFoundException {
                                 final ByteArrayOutputStream bos = byteStreams.get(className);
 
                                 if (bos == null) {
-                                    return null;
+                                    // instead of returning null, delegate the call to the parent ClassLoader
+                                    return super.findClass(className);
                                 }
 
                                 final byte[] b = bos.toByteArray();
@@ -105,6 +96,12 @@ public final class InMemoryCompiler {
                         };
                     }
                 });
+            }
+
+            @Override
+            public boolean isSameFile(final FileObject a, final FileObject b) {
+                return false;
+                // return super.isSameFile(a, b);
             }
 
             @Override
@@ -144,7 +141,7 @@ public final class InMemoryCompiler {
         final DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
 
         // The options passed to the JavaCompiler, see https://docs.oracle.com/javase/7/docs/technotes/tools/windows/javac.html
-        List<String> options = new ArrayList<>(Collections.singletonList("-verbose"));
+        List<String> options = new ArrayList<>(Arrays.asList("-verbose", "-XprintRounds", "-XprintProcessorInfo", "-Xlint"));
 
         // set the class path to be able to use JUnit
         try {
