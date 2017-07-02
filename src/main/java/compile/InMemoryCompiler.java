@@ -66,6 +66,15 @@ public final class InMemoryCompiler {
     public static InMemoryCompiler compile(final List<JavaClass> javaClasses, final String libraryPath) {
         final JavaCompiler javaCompiler = ToolProvider.getSystemJavaCompiler();
 
+        /*
+        final JavaCompiler javaCompiler;
+        try {
+            javaCompiler = (JavaCompiler)Class.forName("com.sun.tools.javac.api.JavacTool").newInstance();
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        */
+
         if (javaCompiler == null) {
             throw new RuntimeException("ToolProvider.getSystemJavaCompiler() returned null! This program needs to be run on a system with an installed JDK.");
         }
